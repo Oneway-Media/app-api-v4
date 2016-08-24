@@ -115,77 +115,20 @@ class News {
     //Get list of news belong to specific category
     public static function listNewsCate($id,$from,$limit = null, $sort=null) {
         
-        $fields = [
-            'id' => 'ID',
-            'title' => 'post_title',
-            'date' => 'post_date',
-            'thumbnail' => ''
-        ];
-
-        if ($from > 0) {$from = $from - 1;} else if ($from <= 0) {$from = 0;};
-        if ($limit == null) { $limit = LIMIT; };
-        if ($sort == null) { $sort = 'new';};
-
-        $offset = intval($from)*intval($limit);
-
-        $arg = [
-            'post_status' => 'publish',
-            'post_type' => 'news',
-            'offset' => $offset,
-            'posts_per_page' => $limit,             
-        ];
-
-        
-
-        if ($sort == 'view') {
-            $arg['orderby'] = 'meta_value_num';
-            $arg['meta_key'] = '_count-views_all';
-            $arg['order'] = 'DESC';
-            
+        if ($id == null || $from == null) {
+            $url = 'http://dev-news.oneway.vn/api/index.php/news-category';
         } else {
-            $arg['orderby'] = ['date' => 'DESC'];
-            
-        }
-
-        if( is_numeric($id) ) {
-            // By ID
-            $arg['tax_query'] = [
-                [
-                    'taxonomy' => 'news_category',
-                    'field'    => 'term_id',
-                    'terms'    => $id,
-                ]
-            ];
-        } else {
-            // By Slug
-            $arg['tax_query'] = [
-                [
-                    'taxonomy' => 'news_category',
-                    'field'    => 'slug',
-                    'terms'    => $id,
-                ]
-            ];
-        }
-
-        $raw = new WP_Query($arg);
-
-        $pre = sanitize($raw->posts, $fields);
-
-        if(count($pre) > 0) {
-            foreach($pre as $p) {
-                $p['thumbnail'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'thumbnail' )[0];
-                $p['cover'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'large' )[0];
-                $p['view'] = intval(get_post_meta( $p['id'], '_count-views_all', true ));
-                $p['like'] = intval(get_post_meta( $p['id'], 'oneway_like', true ));
-                $p['share'] = intval(get_post_meta( $p['id'], 'oneway_share', true ));
-                $p['comment'] = intval(wp_count_comments($p['id'])->approved);
-                $output[] = $p;
+            if ($sort !== null && $limit !== null) {
+                $url = 'http://dev-news.oneway.vn/api/index.php/news-category/'.$id.'/'.$from.'/'.$limit.'/'.$sort;    
+            } elseif ($limit !== null && $sort == null) {
+                $url = 'http://dev-news.oneway.vn/api/index.php/news-category/'.$id.'/'.$from.'/'.$limit;    
+            } else {
+                $url = 'http://dev-news.oneway.vn/api/index.php/news-category/'.$id.'/'.$from;    
             }
-
-            return $output;
-        } else {
-            return [];
+            
         }
+        
+        return curlstream($url);
 
     }
 
