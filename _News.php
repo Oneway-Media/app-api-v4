@@ -116,16 +116,14 @@ class News {
     public static function listNewsCate($id,$from = null,$limit = null, $sort=null) {
         
         if ($from == null) {
-            $url = "http://dev-news.oneway.local/api/index.php/news-category/".$id;
+            $url = "http://news.oneway.vn/api/index.php/news-category/".$id;
         } else {
             if ($from !== null && $limit == null && $sort == null) {
-                $url = "http://dev-news.oneway.local/api/index.php/news-category/".$id.'/'.$from;
-            } elseif ($from !== null || $limit !== null){
-                $url = "http://dev-news.oneway.local/api/index.php/news-category/".$id.'/'.$from.'/'.$limit;
-            } elseif ($from !== null && $limit !== null || $sort !== null) {
-                $url = "http://dev-news.oneway.local/api/index.php/news-category/".$id.'/'.$from.'/'.$limit.'/'.$sort;
+                $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from;
+            } elseif ($from !== null && $limit !== null && $sort !== null) {
+                $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from.'/'.$limit.'/'.$sort;
             } else {
-                $url = "http://dev-news.oneway.local/api/index.php/news-category/".$id;
+                $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from.'/'.$limit;
             }
         }
         
@@ -136,82 +134,16 @@ class News {
     //Get related news by anchor news.
     public static function listNewsRel($id,$from,$limit = null,$sort = null) {
         
-        // Switch $id to ID from slug
-        if( !is_numeric($id) ) {
-            // get id from slug
-            $post = get_page_by_path($id, OBJECT, 'news');
-            $id = $post->ID;
-        };
-
-
-        if ($from > 0) {$from = $from - 1;} else if ($from <= 0) {$from = 0;};
-
-        //Divide amount to get from three sources
-        if ($limit == null || $limit > LIMIT) { 
-            $limit = LIMIT;
-            $search_num = (int) ($limit/3) + ($limit%3);
-        } else {
-            $search_num =  (int) ($limit/3) + ($limit%3);
-        }
-
-        $other_num = ($limit - $search_num)/2;
-
-        $offset = $limit*$from;
-
-        //Get news from keyword
-        $keyword_value = get_post_meta( $id, '_yoast_wpseo_focuskw', true );
-        // check if the custom field has a value
-        if( ! empty( $keyword_value ) ) {
-            $search_res = self::search(no_mark($keyword_value)); 
-            $res = array_splice($search_res, ($offset+1), $search_num);
-        } else {
-            $other_num = (int)($limit /2);
-        }
-
-
-        //Get news random from category
-        $cat = wp_get_post_terms($id,'news_category');
-        $idcat = $cat[0]->term_id;
-        $random_CateNews = self::listNewsCate($idcat,$offset,$other_num);
-        $res = array_merge($res,$random_CateNews);
-
-        //Get news random from news
-        $randomNews = self::listNews($offset,$other_num,'view');
-        $res = array_merge($res,$randomNews);
-
-        //Search for the same post
-        $get_array_id = array_map(function($element){return $element['id'];}, $res);
-        $same_post_key = array_search($id, $get_array_id);
-        
-        //Remove same post 
-        unset($res[$same_post_key]);
-        //Reset array
-        array_values($res);
-        
-        // Replace another post to fill out array 
-        if (count($res) < $limit) {
-            $missing = $limit - count($res);
-            //Get replace post(s).
-            $re_post = self::listNews(0,$missing,'new');
-            $res = array_merge($res,$re_post);
-        }
-
-
-        if(count($res) > 0) {
-            foreach($res as $p) {
-                $p['thumbnail'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'thumbnail' )[0];
-                $p['cover'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'large' )[0];
-                $p['view'] = intval(get_post_meta( $p['id'], '_count-views_all', true ));
-                $p['like'] = intval(get_post_meta( $p['id'], 'oneway_like', true ));
-                $p['share'] = intval(get_post_meta( $p['id'], 'oneway_share', true ));
-                $p['comment'] = intval(wp_count_comments($p['id'])->approved);
-                $output[] = $p;
+        if ($id !== null && $from !== null) {
+            $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from;
+            if ($limit !== null && $sort !==null ) {
+                $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from.'/'.$limit.'/'.$sort;
+            }else {
+                $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from.'/'.$limit;
             }
-
-            return $output;
-        } else {
-            return [];
         }
+
+        return curlstream($url);
 
     }
 
