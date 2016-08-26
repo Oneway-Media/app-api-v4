@@ -162,25 +162,14 @@ class News {
 	
     // Count all news.
     public static function countAll() {
-        $allPosts = wp_count_posts('news');
-        return $allPosts->publish;
+        $url = "http://news.oneway.vn/api/index.php/count-news";
+        return curlstream($url);
     }
 
     // Count news by category.
     public static function countCate($id) {
-
-        $taxonomy = "news_category"; // can be category, post_tag, or custom taxonomy name
-         
-        if( is_numeric($id) ) {
-            // Using Term ID
-            $term = get_term_by('id', $id, $taxonomy);
-        } else {
-            // Using Term Slug
-            $term = get_term_by('slug', $id, $taxonomy);
-        }
-        // Fetch the count
-        return $term->count;
-
+        $url = "http://news.oneway.vn/api/index.php/count-news/".$id;
+        return curlstream($url);
     }
 
     // Get random items.
