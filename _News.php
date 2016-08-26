@@ -9,9 +9,9 @@ class News {
 	public static function category($id = null) {
         
         if ($id !== null) {
-            $url = 'http://dev-news.oneway.vn/api/index.php/category-news/'.$id;    
+            $url = 'http://news.oneway.vn/api/index.php/category-news/'.$id;    
         } else {
-            $url = 'http://dev-news.oneway.vn/api/index.php/category-news';
+            $url = 'http://news.oneway.vn/api/index.php/category-news';
         }
         
         return curlstream($url);
@@ -36,14 +36,14 @@ class News {
     public static function listNews($from,$limit = null, $sort = null) {
 
        if ($from == null) {
-            $url = 'http://dev-news.oneway.vn/api/index.php/news';
+            $url = 'http://news.oneway.vn/api/index.php/news';
         } else {
             if ($sort !== null && $limit !== null) {
-                $url = 'http://dev-news.oneway.vn/api/index.php/news/'.$from.'/'.$limit.'/'.$sort;    
+                $url = 'http://news.oneway.vn/api/index.php/news/'.$from.'/'.$limit.'/'.$sort;    
             } elseif ($limit !== null && $sort == null) {
-                $url = 'http://dev-news.oneway.vn/api/index.php/news/'.$from.'/'.$limit;    
+                $url = 'http://news.oneway.vn/api/index.php/news/'.$from.'/'.$limit;    
             } else {
-                $url = 'http://dev-news.oneway.vn/api/index.php/news/'.$from;    
+                $url = 'http://news.oneway.vn/api/index.php/news/'.$from;    
             }
             
         }
@@ -56,15 +56,16 @@ class News {
     //Get list of news belong to specific category
     public static function listNewsCate($id,$from = null,$limit = null, $sort=null) {
         
-        if ($from == null) {
+        if ($id !== null) {
             $url = "http://news.oneway.vn/api/index.php/news-category/".$id;
-        } else {
-            if ($from !== null && $limit == null && $sort == null) {
-                $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from;
-            } elseif ($from !== null && $limit !== null && $sort !== null) {
+            if ($from !== null && $limit !== null && $sort !== null) {
                 $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from.'/'.$limit.'/'.$sort;
-            } else {
+            } elseif ($from !== null && $limit !== null && $sort == null) {
                 $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from.'/'.$limit;
+            } elseif ($from !== null && $limit == null && $sort == null) {
+                $url = "http://news.oneway.vn/api/index.php/news-category/".$id.'/'.$from;
+            } else {
+                $url = "http://news.oneway.vn/api/index.php/news-category/".$id;
             }
         }
         
@@ -75,15 +76,18 @@ class News {
     //Get related news by anchor news.
     public static function listNewsRel($id,$from,$limit = null,$sort = null) {
         
-        if ($id !== null && $from !== null) {
+        if ($limit == null) {
             $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from;
-            if ($limit !== null && $sort !==null ) {
+        }else {
+            if ($limit !== null && $sort !== null) {
                 $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from.'/'.$limit.'/'.$sort;
-            }else {
+            } elseif ($limit !== null && $sort == null) {
                 $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from.'/'.$limit;
+            } else {
+                $url = "http://news.oneway.vn/api/index.php/news-related/".$id.'/'.$from;
             }
         }
-
+        
         return curlstream($url);
 
     }
@@ -93,9 +97,9 @@ class News {
     public static function newsItem($id,$fields = null) {
         
         if ($fields !== null){
-            $url = "http://dev-news.oneway.local/api/index.php/news-item/".$id.'/'.$fields;
+            $url = "http://news.oneway.vn/api/index.php/news-item/".$id.'/'.$fields;
         } else {
-            $url = "http://dev-news.oneway.local/api/index.php/news-item/".$id;
+            $url = "http://news.oneway.vn/api/index.php/news-item/".$id;
         }
 
         return curlstream($url);
@@ -122,12 +126,15 @@ class News {
     // Get random items by category.
     public static function randomCate($id,$from, $limit = null) {
         
-        if ($limit !== null) {
-            $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from.'/'.$limit;
+        if ($from == null) {
+            $url = "http://news.oneway.vn/api/index.php/random-news/".$id;
         } else {
-            $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from;
+            if ($limit !== null) {
+                $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from.'/'.$limit;
+            } else {
+                $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from;
+            }
         }
-
         return curlstream($url);
     }
 	
