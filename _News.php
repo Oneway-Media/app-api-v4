@@ -174,107 +174,20 @@ class News {
 
     // Get random items.
     public static function randomAll() {
-        
-
-        $fields = [
-            'id' => 'ID',
-            'title' => 'post_title',
-            'date' => 'post_date',
-            'thumbnail' => ''
-        ];
-
-        $arg = [
-            'post_status' => 'publish',
-            'post_type' => 'news',
-            'posts_per_page' => LIMIT,  
-            'orderby'   => 'rand'
-        ];
-
-        $raw = new WP_Query($arg);
-
-        $pre = sanitize($raw->posts, $fields);
-
-        if(count($pre) > 0) {
-            foreach($pre as $p) {
-                $p['thumbnail'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'thumbnail' )[0];
-                $p['cover'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'large' )[0];
-                $p['view'] = intval(get_post_meta( $p['id'], '_count-views_all', true ));
-                $p['like'] = intval(get_post_meta( $p['id'], 'oneway_like', true ));
-                $p['share'] = intval(get_post_meta( $p['id'], 'oneway_share', true ));
-                $p['comment'] = intval(wp_count_comments($p['id'])->approved);
-                $output[] = $p;
-            }
-
-            return $output;
-        } else {
-            return [];
-        }
-
-
+        $url = "http://news.oneway.vn/api/index.php/random-news";
+        return curlstream($url);
     }
 
     // Get random items by category.
     public static function randomCate($id,$from, $limit = null) {
-        $fields = [
-            'id' => 'ID',
-            'title' => 'post_title',
-            'date' => 'post_date',
-            'thumbnail' => ''
-        ];
-
-        if ($from > 0) {$from = $from - 1;} else if ($from <= 0) {$from = 0;};
-        if ($limit == null) { $limit = LIMIT; };
-
-        $offset = intval($from)*intval($limit);
-
-        $arg = [
-            'post_status' => 'publish',
-            'post_type' => 'news',
-            'offset' => $offset,
-            'posts_per_page' => $limit,  
-            'orderby'   => 'rand'
-        ];
-
-
-        if( is_numeric($id) ) {
-            // By ID
-            $arg['tax_query'] = [
-                [
-                    'taxonomy' => 'news_category',
-                    'field'    => 'term_id',
-                    'terms'    => $id,
-                ]
-            ];
+        
+        if ($limit !== null) {
+            $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from.'/'.$limit;
         } else {
-            // By Slug
-            $arg['tax_query'] = [
-                [
-                    'taxonomy' => 'news_category',
-                    'field'    => 'slug',
-                    'terms'    => $id,
-                ]
-            ];
+            $url = "http://news.oneway.vn/api/index.php/random-news/".$id.'/'.$from;
         }
 
-        $raw = new WP_Query($arg);
-
-        $pre = sanitize($raw->posts, $fields);
-
-        if(count($pre) > 0) {
-            foreach($pre as $p) {
-                $p['thumbnail'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'thumbnail' )[0];
-                $p['cover'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'large' )[0];
-                $p['view'] = intval(get_post_meta( $p['id'], '_count-views_all', true ));
-                $p['like'] = intval(get_post_meta( $p['id'], 'oneway_like', true ));
-                $p['share'] = intval(get_post_meta( $p['id'], 'oneway_share', true ));
-                $p['comment'] = intval(wp_count_comments($p['id'])->approved);
-                $output[] = $p;
-            }
-
-            return $output;
-        } else {
-            return [];
-        }
+        return curlstream($url);
     }
 	
 }
