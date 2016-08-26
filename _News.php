@@ -22,72 +22,13 @@ class News {
 	// Searching
     public static function search($keyword, $category = null) {
         
-        $fields = [
-            'id' => 'ID',
-            'title' => 'post_title',
-            'date' => 'post_date',
-            'thumbnail' => ''
-        ];
-        
-        if( $category === null ) { // Search all            
-            $raw = new WP_Query([
-                'post_status' => 'publish',
-                'post_type' => 'news',
-                'posts_per_page' => LIMIT,
-                's' => $keyword                
-            ]);
-        } else { //Search by category
-            if( is_numeric($category) ) {
-                // Using Term ID
-                $raw = new WP_Query([
-                    'post_status' => 'publish',
-                    'post_type' => 'news',
-                    'tax_query' => [
-                        [
-                            'taxonomy' => 'news_category',
-                            'field'    => 'term_id',
-                            'terms'    => $category,
-                        ]
-                    ],
-                    'posts_per_page' => LIMIT,
-                    's' => $keyword                
-                ]);
-            } else {
-                // Using Term Slug
-                $raw = new WP_Query([
-                    'post_status' => 'publish',
-                    'post_type' => 'news',
-                    'tax_query' => [
-                        [
-                            'taxonomy' => 'news_category',
-                            'field'    => 'slug',
-                            'terms'    => $category,
-                        ]
-                    ],
-                    'posts_per_page' => LIMIT,
-                    's' => $keyword                
-                ]);
-            }
-        }
-            
-        $pre = sanitize($raw->posts, $fields);
-        
-        if(count($pre) > 0) {
-            foreach($pre as $p) {
-                $p['thumbnail'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'thumbnail' )[0];
-                $p['cover'] =  wp_get_attachment_image_src( get_post_thumbnail_id( $p['id'] ), 'large' )[0];
-                $p['view'] = intval(get_post_meta( $p['id'], '_count-views_all', true ));
-                $p['like'] = intval(get_post_meta( $p['id'], 'oneway_like', true ));
-                $p['share'] = intval(get_post_meta( $p['id'], 'oneway_share', true ));
-                $p['comment'] = intval(wp_count_comments($p['id'])->approved);
-                $output[] = $p;
-            }
-
-            return $output;
+        if ($category !== null) {
+            $url = "http://news.oneway.vn/api/index.php/search-news/".$keyword.'/'.$category;
         } else {
-            return [];
+            $url = "http://news.oneway.vn/api/index.php/search-news/".$keyword;
         }
         
+        return curlstream($url);
     }
 
 
