@@ -249,9 +249,6 @@ $router->get('/news/:from/:limit/:sort', function ($from, $limit, $sort) use ($N
 /*
 *   http://test.oneway.vn/api/api-v3/index.php/news-category/:slug|id/:from[/:limit/:sort]
 */
-$router->get('/news-category/:id', function ($id) use ($News) {
-    json ($News->listNewsCate($id));
-});
 $router->get('/news-category/:id/:from', function ($id,$from) use ($News) {
     json ($News->listNewsCate($id,$from));
 });
